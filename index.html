@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title> 機械学習に基づく自然言語処理勉強会 </title>
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/beige.css">
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section style="font-size:80%">
+        <h3> 2014年 機械学習に基づく自然言語処理勉強会 資料 </h3>
+        <p style="font-size:60%">
+        <a href="1.html">第1回:イントロダクション，単語・文章の数学的表現</a><br>
+        <a href="2.html">第2回:文書の分類問題</a><br>
+        <a href="3.html">第3回:文書のクラスタリング問題</a><br>
+        <a href="4.html">第4回:系列ラベリング問題</a><br>
+        </p>
+
+        </section>
+      </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				history: true,
+				center: true,
+        rollingLinks: false,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'none', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+      Reveal.addEventListener( 'slidechanged', function( event ) {
+        MathJax.Hub.Rerender(event.currentSlide);
+      });
+
+		</script>
+
+    <!-- ADNETWORK by RAO ReTargeting Tag BEGIN -->
+    <script type="text/javascript">
+      document.writeln('<sc'+'ript language="JavaScript" type="text/javascript" charset="utf-8" src="'+location.protocol+'//cdn.c-team.jp/ran/c/worksapp-hp/worksapp-hp.js"></sc'+'ript>');
+    </script>
+    <!-- ADNETWORK by RAO ReTargeting Tag END -->
+  </body>
+</html>

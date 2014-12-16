@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="ja">
+
+	<head>
+		<meta charset="utf-8">
+
+    <title>機械学習に基づく自然言語処理勉強会 第1回 @ ナビプラス </title>
+
+		<meta name="description" content="Seminar of category theory">
+    <meta name="author" content="Koichi Nakamura">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/beige.css" id="theme">
+
+    <meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+
+		<!-- For syntax highlighting -->
+    <link rel="stylesheet" href="plugin/highlight/styles/github.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+    <script type="text/javascript"
+      src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML">
+    </script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+          displayMath: [ ['$$','$$'], ["\\[","\\]"] ]
+        }
+      });
+    </script>
+
+    <style type="text/css">
+      <!--
+      div.definition {
+        padding-left: 10px;
+        padding-right: 10px;
+        border: 4px solid #333333;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+      }
+
+      .reveal .chapter-title {
+        margin-top: 3em;
+      }
+
+      .reveal {
+        font-size: 36px;
+        line-height: 1.4em;
+      }
+
+      .reveal .slides {
+        text-align: left;
+      }
+
+      .reveal section img {
+        border: none;
+        background: 0;
+        margin-left: 1em;
+        margin-right: 1em;
+        box-shadow: none;
+      }
+
+      .reveal strong {
+        color: #ff6666;
+      }
+
+      .reveal sup {
+        font-size: 40%;
+      }
+
+      .reveal .note {
+        font-size: 40%;
+      }
+
+      .reveal .controls div.navigate-up,
+      .reveal .controls div.navigate-down {
+        display: none;
+      }
+
+      .reveal .block {
+        border: solid 2px;
+        position: relative;
+        border-radius: 8px;
+        margin: 0.5em;
+        padding: 1em 0.8em 0.5em 0.8em;
+      }
+
+      .reveal .block:after {
+        content: "";
+        display: block;
+        clear: both;
+        height: 1px;
+        overflow: hidden;
+      }
+
+      .reveal .block h4 {
+        position: absolute;
+        top: -0.5em;
+        margin: 0 auto;
+        background: #111111;
+        font-weight: bold;
+      }
+      --> 
+    </style>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+
+        <section>
+        <h2> 機械学習に基づく <br> 自然言語処理勉強会 <br> 第1回 </h2>
+        <h3>@ナビプラス </h3>
+        <small> 中村晃一 <br> 2014年11月20日 </small>
+        </section>
+
+        <section>
+        <h3>謝辞</h3>
+        <p>
+        この会の企画・会場設備の提供をして頂きました<br>
+        &#12849; ナビプラス様<br>
+        にこの場をお借りして御礼申し上げます.
+        </p>
+        </section>
+
+        <section>
+        <h3> 自己紹介 </h3>
+        <ul>
+          <li> 中村晃一</li>
+          <li> 東京大学 大学院 情報理工学系研究科<br>
+          コンピュータ科学専攻 </li>
+          <li> 専門は最適化コンパイラ </li>
+          <li> twitter: <a href="http://twitter.com/9_ties">@9_ties</a></li>
+        </ul>
+        </section>
+
+        <section>
+        <h2> はじめに </h2>
+        </section>
+
+        <section>
+        <h3> この会について </h3>
+        <ul>
+            <li> 「機械学習に基づく」「自然言語処理」の勉強会です. </li>
+            <li> 基本的な微積分・線形代数・確率統計の知識を前提とします. </li>
+            <li> 資料中のサンプルコードは主にPythonで書きます. </li>
+        </ul>
+        </section>
+
+        <section>
+        <h2 class="chapter-title"> イントロダクション </h2>
+        </section>
+
+        <section>
+        <h3> 自然言語処理とは </h3>
+        <p>
+        <strong> 自然言語 (natural language) </strong> とは，人間が使用する言語の総称です.
+        </p>
+        <p class="fragment">
+        従って，<strong> 自然言語処理 (natural language processing, NLP) </strong> とは人間が使用する言語を計算機に処理させる為の理論・技術を指します.
+        </p>
+        <p class="fragment" style="font-size:90%">
+        これに対して，プログラミング言語などは人工言語(artificial language)とか形式言語(formal language)と呼ばれます.
+        </p>
+        </section>
+
+        <section>
+        <h3> 自然言語処理とは </h3>
+        <p>
+        自然言語処理の多くの問題は <strong> 文書として表現されたもの </strong> を考えます.
+        この勉強会では音声やボディーランゲージなどの言語表現については考えません.
+        </p>
+        </section>
+
+        <section>
+        <h3> 自然言語処理の応用 </h3>
+        <p>
+        自然言語を利用するあらゆる事が応用分野です. 代表的なものは
+        </p>
+        <ul>
+            <li> 検索エンジン </li>
+            <li> かな漢字変換 </li>
+            <li> 機械翻訳 </li>
+            <li> メールのフィルタリング </li>
+            <li> 推薦エンジン </li>
+            <li> 自動要約 </li>
+            <li> 対話システム </li>
+        </ul>
+        <p>
+        などです.
+        </p>
+        </section>
+
+        <section>
+        <h3> 機械学習とは </h3>
+        <p>
+        <strong> 機械学習 (machine learning, ML)</strong> とは，人間が行うような学習行為を計算機に行わせる為の理論・技術の総称です.
+        </p>
+        <p class="fragment" data-fragment-index="1">
+        学習用のデータを用いて，何らかのモデルを訓練する事によって，目的のタスクをこなせるプログラムを得る事を目指します.
+        </p>
+        <div class="fragment" data-fragment-index="1" align="center"> <img src="images/machine-learning.png"> </div>
+        </section>
+
+        <section>
+        <p>
+        自然言語処理の問題へのアプローチの多くは大別すると，
+        </p>
+        <ul>
+            <li> 文書を論理的に分析していくもの (論理的手法) </li>
+        </ul>
+        <p>
+        と
+        </p>
+        <ul>
+            <li> 文書の統計的な特徴を分析に利用するもの (統計的手法) </li>
+        </ul>
+        <p>
+        の２通りになります.
+        </p>
+        <p class="fragment">
+        例として「スパムメールの判定」という問題でこの２つを比べてみましょう.
+        <p>
+        </section>
+
+        <section>
+        <p>
+        「論理的」なアプローチでは，メールがスパムである為の論理的な条件を構築し，それを利用して判定を行います.
+        </p>
+        <div align="center"> <img src="images/rule-based-spam-filter.png"> </div>
+        </section>
+
+        <section>
+        <p>
+        「統計的」なアプローチでは，多数のスパムメールと非スパムメールを分析して特徴を発見し，それに基いて判定を行います.
+        </p>
+        <div align="center"> <img src="images/ML-based-spam-filter.png"> </div>
+        </section>
+
+        <section>
+        <p>
+        これらのアプローチは全く性質が異なるものであり，一概にどちらが優れているという事はありません。
+        </p>
+        <p class="fragment">
+        多くの現実のシステムはこれらのハイブリッドになっていると思いますが， この勉強会では機械学習の中でも <strong> 統計的な考え方に基づく手法 </strong> の紹介を行います.
+        </p>
+        </section>
+
+        <section>
+        <h3> コーパス </h3>
+        <p>
+        多数の単語・文章・文書などの自然言語データを計算機で扱い易いように整理したものを <strong> コーパス(corpus) </strong> と呼びます.
+        言語処理システムの訓練を行う為には，何らかのコーパスが必要です. 
+        </p>
+        <p class="fragment">
+        この会では，勉強用として <a href="http://qwone.com/~jason/20Newsgroups/">20 Newsgroups</a> という小さめのコーパスを主に利用します(scikit-learnに標準で用意されている為).
+        </p>
+        <p class="fragment">
+        様々な研究所や企業が独自に公開しているコーパスを利用する事も出来ますし，Webから自分で文書を集めても良いです. 是非面白いデータセットを見つけて下さい.
+        </p>
+        </section>
+
+        <section>
+        <h2 class="chapter-title"> 文書の数学的表現 </h2>
+        </section>
+
+        <section>
+        <p>
+        文書を数学的に取り扱う為には，それを数学の語彙(集合やベクトルなど)を用いて表現する必要があります.
+        \[ \text{文書 $d$} \Rightarrow \mathbf{d}=(1,0,0,2,0,\dots,0) \]
+        </p>
+        <p class="fragment">
+        多くの場合は，自然数ベクトルや実数ベクトルとなります. これを一般に <strong> 特徴ベクトル (feature vector) </strong> と呼び，特徴ベクトルの各成分を <strong> 特徴量 (feature value) </strong> と呼びます.
+        </p>
+        <p class="fragment">
+        自然言語処理の文脈ではこれらを <strong> 素性 </strong> 及び <strong> 素性値 </strong> と呼ぶ事もあります.
+        </p>
+        </section>
+
+        <section>
+        <h3> トークン </h3>
+        <p>
+        前提として，文書は <strong> トークン (token) </strong> の列に区切られているとします.
+        </p>
+        <div align="center"> <img src="images/tokanize.png"> </div>
+        <p>
+        トークンは問題に応じて文字単位の場合もあれば，単語単位の場合もあります. どちらの場合も合わせて，トークンの事を単に <strong> 単語 (word) </strong> と呼ぶ事もあります.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        日本語の文章は英語と異なって文章を単語毎に区切る事が簡単ではありません.
+        </p>
+        <p class="fragment">
+        文章を，意味を持つ最小の単語単位に分解し，その品詞などの付加情報を付与する事を <strong> 形態素解析 (morphological analysis) </strong> と呼びます.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        日本語の文章の場合 <a href="http://mecab.googlecode.com/svn/trunk/mecab/doc/index.html"> MeCab </a> などのソフトウェアを利用してこの処理を行う事が出来ます.
+<pre><code style="max-height:400px">% mecab
+機械学習に基づく自然言語処理勉強会
+機械    名詞,一般,*,*,*,*,機械,キカイ,キカイ,,
+学習    名詞,サ変接続,*,*,*,*,学習,ガクシュウ,ガクシュー,,
+に      助詞,格助詞,一般,*,*,*,に,ニ,ニ,,
+基づく  動詞,自立,*,*,五段・カ行イ音便,基本形,基づく,モトヅク,モトズク,もとづく/基く/基づく,
+自然    名詞,形容動詞語幹,*,*,*,*,自然,シゼン,シゼン,,
+言語    名詞,一般,*,*,*,*,言語,ゲンゴ,ゲンゴ,,
+処理    名詞,サ変接続,*,*,*,*,処理,ショリ,ショリ,,
+勉強    名詞,サ変接続,*,*,*,*,勉強,ベンキョウ,ベンキョー,,
+会      名詞,接尾,一般,*,*,*,会,カイ,カイ,,
+EOS
+</code></pre>
+        </p>
+        <p class="fragment">
+        形態素解析に利用されている手法自体の学習は後の回にする事にしまして，とりあえずはこういったソフトウェアを利用させて頂く事にしましょう.
+        </p>
+        </section>
+
+        <section>
+        <h3> 正規化 </h3>
+        <p>
+        トークンの列には通常何らかの <strong> 正規化 (normalization) </strong> が施されます. 
+        </p>
+        <ul>
+            <li class="fragment"> 同じ意味で、異なる単語を同一の単語に揃える.
+                <ul>
+                    <li> 例: 「車」「くるま」「クルマ」を「車」に統一する. </li>
+                </ul>
+            </li>
+            <li class="fragment"> 違う意味で、同じ単語を異なる単語にする.
+                <ul>
+                    <li> 例: 「山口」を「山口【地名】」，「山口【人名】」などと変換する.
+                </ul>
+            </li>
+            <li class="fragment"> 同じ意味で、活用の異なる動詞や形容詞を揃える.(<strong> ステミング (stemming) </strong>)
+                <ul>
+                    <li> 例: 「走る」「走り」「走ら」などを「走る」に統一する.
+                </ul>
+            </li>
+        </ul>
+        </section>
+
+        <section>
+        <p>
+        こういった処理をする場合にもやはりMeCabのような形態素解析器を利用する事が出来ます. 
+        例えば，以下の様に人名の「山口」と地名の「山口」を区別する事が出来ます.
+        </p>
+<pre><code style="max-height:400px">% mecab
+山口さんは山口県出身です
+山口    名詞,固有名詞,人名,姓,*,*,山口,ヤマグチ,ヤマグチ,,
+さん    名詞,接尾,人名,*,*,*,さん,サン,サン,,
+は      助詞,係助詞,*,*,*,*,は,ハ,ワ,,
+山口    名詞,固有名詞,地域,一般,*,*,山口,ヤマグチ,ヤマグチ,,
+県      名詞,接尾,地域,*,*,*,県,ケン,ケン,,
+出身    名詞,一般,*,*,*,*,出身,シュッシン,シュッシン,,
+です    助動詞,*,*,*,特殊・デス,基本形,です,デス,デス,,
+EOS
+</code></pre>
+        <p>
+        英語の場合の <strong> ポーターのステマー </strong> のような単純な方法も使われます.
+        </p>
+        </section>
+
+        <section>
+        <h3> ストップワード </h3>
+        <p>
+        助詞の「は」や「を」や、「です」などの単語は特徴量としては一般的過ぎて役に立たない事があります.
+        </p>
+        <p class="fragment">
+        このようなワードを <strong> ストップワード (stop word)</strong> と呼び，トークンの列からあらかじめ除去しておくなどの処理を行う事があります.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        以上で説明した前処理はそれぞれ非常に難しく，分野に応じて適切な方法も変わると思いますが，とりあえず本日は前処理が終わったとして，それをどうやって特徴ベクトル化するかを説明して行きます.
+        </p>
+        </section>
+
+        <section>
+        <h3> 二値ベクトル表現 </h3>
+        <p>
+        単語の総数を $N$ とし，各単語には番号が振られているとします.
+        </p>
+        <p class="fragment">
+        文書 $d$ に，単語 $w$ が出現している場合には $d_w = 1$，そうでない場合には $d_w = 0$ とする表現を <strong> 二値ベクトル (binary vector) </strong> 表現と呼びます.
+        \[ \mathbf{d} = (0,0,\ldots,0,1,0,1,\ldots,0,1,0) \]
+        </p>
+        </section>
+
+        <section>
+        <p>
+        以下は <a href="http://scikit-learn.org"> Scikit-learn </a> というPythonのライブラリでこの変換を行ってみる例です.
+        </p>
+<pre><code class="python" style="max-height:400px"># 例題用のコーパス (文書数=1)
+>>> corpus = [
+...     "Hello Machine Learning World"
+... ]
+
+# 特徴ベクトルへの変換器を用意(binary=True は二値ベクトル用の指定)
+>>> from sklearn.feature_extraction.text import CountVectorizer
+>>> vec = CountVectorizer(binary=True)
+
+# コーパスを読み込ませる
+>>> vec.fit(corpus)
+CountVectorizer(analyzer=u'word', binary=True, charset=None,
+        charset_error=None, decode_error=u'strict',
+        dtype=<type 'numpy.int64'>, encoding=u'utf-8', input=u'content',
+        lowercase=True, max_df=1.0, max_features=None, min_df=1,
+        ngram_range=(1, 1), preprocessor=None, stop_words=None,
+        strip_accents=None, token_pattern=u'(?u)\\b\\w\\w+\\b',
+        tokenizer=None, vocabulary=None)
+
+# 特徴量は4単語.(大文字→小文字という簡単な正規化が行われています)
+>>> vec.get_feature_names()
+[u'hello', u'learning', u'machine', u'world']
+
+# 文章 "Hello World" を特徴ベクトル化したもの.
+>>> vec.transform(["Hello World"]).toarray()
+array([[1, 0, 0, 1]])
+
+# 文章 "Machine Learning" を特徴ベクトル化したもの.
+>>> vec.transform(["Machine Learning"]).toarray()
+array([[0, 1, 1, 0]])
+
+# 語順が代わってもベクトルは変化しない.
+>>> vec.transform(["Learning Machine"]).toarray()
+array([[0, 1, 1, 0]])
+
+# 二値ベクトルの場合は，単語の出現回数は関係ない.
+>>> vec.transform(["Hello Hello"]).toarray()
+array([[1, 0, 0, 0]])
+</code></pre>
+        </section>
+
+        <section>
+        <h3> 頻度ベクトル表現 </h3>
+        <p>
+        $d_w$ を文書 $d$ 内に単語 $w$ が出現した回数とする表現を <strong> 頻度ベクトル (term frequency vector) </strong> 表現と呼びます.
+        \[ \mathbf{d} = (0,0,\ldots,0,2,0,1,\ldots,0,3,0) \]
+        </p>
+        </section>
+
+        <section>
+        <p> 例 </p>
+<pre><code class="python" style="max-height:400px"># 例題用のコーパス (文書数=1)
+>>> corpus = [
+...     "Hello Machine Learning World"
+... ]
+
+# 特徴ベクトルへの変換器を用意
+>>> from sklearn.feature_extraction.text import CountVectorizer
+>>> vec = CountVectorizer()
+
+# コーパスを読み込ませる
+>>> vec.fit(corpus)
+CountVectorizer(analyzer=u'word', binary=False, charset=None,
+        charset_error=None, decode_error=u'strict',
+        dtype=<type 'numpy.int64'>, encoding=u'utf-8', input=u'content',
+        lowercase=True, max_df=1.0, max_features=None, min_df=1,
+        ngram_range=(1, 1), preprocessor=None, stop_words=None,
+        strip_accents=None, token_pattern=u'(?u)\\b\\w\\w+\\b',
+        tokenizer=None, vocabulary=None)
+
+# 文章 "Hello World" を特徴ベクトル化したもの.
+>>> vec.transform(["Hello World"]).toarray()
+array([[1, 0, 0, 1]])
+
+# 文章 "Machine Learning" を特徴ベクトル化したもの.
+>>> vec.transform(["Machine Learning"]).toarray()
+array([[0, 1, 1, 0]])
+
+# 各単語の出現回数が特徴量となる.
+>>> vec.transform(["Hello Hello"]).toarray()
+array([[2, 0, 0, 0]])
+</code></pre>
+        </section>
+
+        <section>
+        <h3> 正規化された頻度ベクトル表現 </h3>
+        <p>
+        頻度ベクトルのノルムが $1$ になるように正規化したものを利用する事も出来ます. これもやはり「頻度ベクトル」と呼ばれます.
+        </p>
+        <p>
+        単純に「頻度ベクトル」と言っても，
+        </p>
+        <ul>
+            <li> 正規化されているか否か？ </li>
+            <li> ノルムは何を利用しているか？ </li>
+        </ul>
+        <p>
+        という点でバリエーションがありますので、各種ソフトウェアを使う場合にはドキュメントを良く読むようにして下さい.
+        </p>
+        </section>
+
+        <section>
+        <p> 例($L1$ ノルムの場合) </p>
+<pre><code class="python" style="max-height:400px">>>> corpus = ["Hello Machine Learning World"]
+>>> from sklearn.feature_extraction.text import TfidfVectorizer
+>>> vec = TfidfVectorizer(norm='l1', use_idf=False)
+>>> vec.fit(corpus)
+TfidfVectorizer(analyzer=u'word', binary=False, charset=None,
+        charset_error=None, decode_error=u'strict',
+        dtype=<type 'numpy.int64'>, encoding=u'utf-8', input=u'content',
+        lowercase=True, max_df=1.0, max_features=None, min_df=1,
+        ngram_range=(1, 1), norm='l1', preprocessor=None, smooth_idf=True,
+        stop_words=None, strip_accents=None, sublinear_tf=False,
+        token_pattern=u'(?u)\\b\\w\\w+\\b', tokenizer=None, use_idf=False,
+        vocabulary=None)
+>>> vec.transform(["Hello World"]).toarray()
+array([[ 0.5,  0. ,  0. ,  0.5]])              # 和が1
+>>> vec.transform(["Hello, Hello World"]).toarray()
+array([[ 0.66666667,  0.        ,  0.        ,  0.33333333]])
+</code></pre>
+        </section>
+
+        <section>
+        <p> 例($L2$ ノルムの場合) </p>
+<pre><code class="python" style="max-height:400px">>>> corpus = ["Hello Machine Learning World"]
+>>> from sklearn.feature_extraction.text import TfidfVectorizer
+>>> vec = TfidfVectorizer(norm='l2', use_idf=False)
+>>> vec.fit(corpus)
+TfidfVectorizer(analyzer=u'word', binary=False, charset=None,
+        charset_error=None, decode_error=u'strict',
+        dtype=<type 'numpy.int64'>, encoding=u'utf-8', input=u'content',
+        lowercase=True, max_df=1.0, max_features=None, min_df=1,
+        ngram_range=(1, 1), norm='l2', preprocessor=None, smooth_idf=True,
+        stop_words=None, strip_accents=None, sublinear_tf=False,
+        token_pattern=u'(?u)\\b\\w\\w+\\b', tokenizer=None, use_idf=False,
+        vocabulary=None)
+>>> vec.transform(["Hello World"]).toarray()    # 二乗和が1
+array([[ 0.70710678,  0.        ,  0.        ,  0.70710678]])
+</code></pre>
+        </section>
+
+        <section>
+        <h3> Tf-Idf表現 </h3>
+        <p>
+        頻度ベクトル表現の改良として「単語毎に異なる重みを付ける」という方法があります.
+        \[ \text{(特徴量)} = \text{(Term Frequency)} \times \text{(重み)} \]
+        </p>
+        <p class="fragment">
+        ここでは <strong> Tf-Idf 表現 (Term Frequency-Inverse Document Frequency Representation) </strong> という表現を紹介します.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        確率 $p$ で出現するデータが観測された時に得られる <strong> 選択情報量 (selective information) </strong> は $-\log p$ で定義されます.
+        出現確率が低いデータほど高い情報量を持ちます.
+        </p>
+        <div align="center"> <img width="700px" src="images/selective-information.png"> </div>
+        <p>
+        各単語 $w$ 毎に，その選択情報量で重み付けしようというのが Tf-Idf 表現です. Tf-Idfでは「文書に $w$ が出現する」確率 $P(w)$を用います.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        $P(w)$ の厳密な値は分からないので，コーパスに対する統計を用いて推定します. 例えば、最尤推定ならば
+        \[ P(w) = \frac{\text{単語 $w$ が出現した文書の数}}{\text{文書の数}} \]
+        です. この値を $w$ の <strong> 文書頻度(DF, document frequency) </strong> と呼びます.
+        </p>
+        <p>
+        <strong> ラプラススムージング (Laplace smoothing) </strong>
+        \[ P(w) = \frac{\text{単語 $w$ が出現した文書の数}+1}{\text{文書の数}+\text{単語数}} \]
+        も良く利用されます. これは，ディリクレ分布を事前分布として用いたMAP推定の特別な場合です.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        単語 $w$ に対する重み(選択情報量)を変形すると
+        \[ -\log P(w) = \log \frac{1}{P(w)} \]
+        となります.
+        </p>
+        <p>
+        この $\log$ 内は文書頻度の逆数なので <strong> 逆文書頻度(IDF, inverse document frequency) </strong> と呼びます.
+        </p>
+        </section>
+
+        <section style="font-size:90%">
+        <p>
+        まとめると、各単語 $w$ 毎に
+        \[ \text{Tf-Idf} = \text{(Term Frequency)}\times \text{(Inverse Document Frequency)} \]
+        を特徴量に用いたものがTf-Idf表現です.
+        </p>
+        <p class="fragment">
+        単に Tf-Idf と言っても，頻度ベクトルの定義や $P(w)$ の推定方法など様々なバージョンがありますので注意して下さい. 例えば，次ページのscikit-learnでの例でも若干の変更が行われています.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        例
+        </p>
+<pre><code class="python" style="max-height:400px"># 今回は3文書用意
+>>> corpus = [
+...     "Hello Machine Learning World",
+...     "Natural Language Processing",
+...     "We are the world"
+... ]
+>>> from sklearn.feature_extraction.text import TfidfVectorizer
+>>> vec = TfidfVectorizer(smooth_idf=False) # スムージングなしの場合
+>>> vec.fit(corpus)
+TfidfVectorizer(analyzer=u'word', binary=False, charset=None,
+        charset_error=None, decode_error=u'strict',
+        dtype=<type 'numpy.int64'>, encoding=u'utf-8', input=u'content',
+        lowercase=True, max_df=1.0, max_features=None, min_df=1,
+        ngram_range=(1, 1), norm=u'l2', preprocessor=None,
+        smooth_idf=False, stop_words=None, strip_accents=None,
+        sublinear_tf=False, token_pattern=u'(?u)\\b\\w\\w+\\b',
+        tokenizer=None, use_idf=True, vocabulary=None)
+>>> vec.get_feature_names()
+[u'are', u'hello', u'language', u'learning', u'machine', u'natural', u'processing', u'the', u'we', u'world']
+
+# sklearnの実装では,idfの代わりにidf+1が重みとして使われる.
+# 例えば「world]の場合は3文書中, 2文書に出現しているので
+# log(3/2) + 1 = 1.40546511
+# が重みとして使われる.
+>>> vec.idf_
+array([ 2.09861229,  2.09861229,  2.09861229,  2.09861229,  2.09861229,
+        2.09861229,  2.09861229,  2.09861229,  2.09861229,  1.40546511])
+
+# さらに、重み付けした後に正規化が行われる.
+>>> vec.transform(["Hello World"]).toarray()
+array([[ 0.        ,  0.83088075,  0.        ,  0.        ,  0.        ,
+         0.        ,  0.        ,  0.        ,  0.        ,  0.55645052]])
+
+# スムーシングを行った場合
+>>> vec = TfidfVectorizer(smooth_idf=True)
+>>> vec.fit(corpus)
+TfidfVectorizer(analyzer=u'word', binary=False, charset=None,
+        charset_error=None, decode_error=u'strict',
+        dtype=<type 'numpy.int64'>, encoding=u'utf-8', input=u'content',
+        lowercase=True, max_df=1.0, max_features=None, min_df=1,
+        ngram_range=(1, 1), norm=u'l2', preprocessor=None, smooth_idf=True,
+        stop_words=None, strip_accents=None, sublinear_tf=False,
+        token_pattern=u'(?u)\\b\\w\\w+\\b', tokenizer=None, use_idf=True,
+        vocabulary=None)
+
+# 単語「world」とそれ以外の重みの差が減少.
+# この実装では分母と分子に +1 するという(あまり一般的ではない)方法が取られている.
+>>> vec.idf_
+array([ 1.69314718,  1.69314718,  1.69314718,  1.69314718,  1.69314718,
+        1.69314718,  1.69314718,  1.69314718,  1.69314718,  1.28768207])
+</code></pre>
+        </section>
+
+        <section>
+        <h3> Bag of words表現 </h3>
+        <p>
+        これまでに紹介した表現方法は，各特徴量が1単語を表現していますので <strong> bag-of-words 表現 (BOW表現) </strong> と呼ばれます.
+        </p>
+        <div class="fragment">
+        <p>
+        語順が捨てられているので，例えば
+        <ul>
+            <li> 一郎は二郎の兄です. </li>
+        </ul>
+        <p>
+        と
+        </p>
+        <ul>
+            <li> 二郎は一郎の兄です. </li>
+        </ul>
+        <p>
+        は全く意味の異なる文章ですが同じ特徴ベクトルになります.
+        </p>
+        </div>
+        </section>
+
+        <section>
+        <h3> nグラム </h3>
+        <p>
+        隣り合って出現した $n$ 個の単語をまとめて１つの単語とみなした物を <strong> $n$ グラム ($n$-gram)</strong> と呼びます.
+        </p>
+        <p>
+        $n=1$ の時は <strong> ユニグラム (unigram) </strong>，$2$ の時は <strong> バイグラム (bigram) </strong>， $3$ の時は <strong> トライグラム (trigram) </strong> と呼びます.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        例えば「This is a pen」をバイグラムのトークン列に直すと
+        \[ (\text{[begin] This}),\quad (\text{This is}),\quad (\text{is a}),\quad (\text{a pen}),\quad (\text{pen [end]}) \]
+        となります. [begin]や[end]はそれが文頭，文末である事を表すダミーの単語です.
+        </p>
+        <p>
+        "begin"や"end"は考えず
+        \[ (\text{This is}),\quad (\text{is a}),\quad (\text{a pen}) \]
+        の3つのトークンからなるとする場合もあります.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        $n$ グラム表現とは「単語」の範囲を拡大するものであるので，二値ベクトルや頻度ベクトル表現をそのまま利用する事が出来ます.
+        こういった表現は <strong> bag-of-$n$ grams </strong> と呼ばれます.
+        </p>
+        </section>
+
+        <section>
+        <p> 例 </p>
+<pre><code class="python" style="max-height:400px">>>> corpus = ["Hello Machine Learning World"]
+>>> from sklearn.feature_extraction.text import CountVectorizer
+>>> vec = CountVectorizer(ngram_range=(2, 2))   # バイグラム用変換器
+>>> vec.fit(corpus)
+CountVectorizer(analyzer=u'word', binary=False, charset=None,
+        charset_error=None, decode_error=u'strict',
+        dtype=<type 'numpy.int64'>, encoding=u'utf-8', input=u'content',
+        lowercase=True, max_df=1.0, max_features=None, min_df=1,
+        ngram_range=(2, 2), preprocessor=None, stop_words=None,
+        strip_accents=None, token_pattern=u'(?u)\\b\\w\\w+\\b',
+        tokenizer=None, vocabulary=None)
+
+# 語彙サイズは3つ
+>>> vec.get_feature_names()
+[u'hello machine', u'learning world', u'machine learning']
+
+# 以下のテキストでは"machine learning" のみが出現.
+# "world"はcorpusに出現するにも関わらずバイグラムとして
+# "world of"は存在しないので無視される.
+>>> vec.transform(["World of machine learning"]).toarray()
+array([[0, 0, 1]])
+
+# コーパスのサイズが小さい場合には，ユニグラムとバイグラムを併用すると良い.
+>>> vec = CountVectorizer(ngram_range=(1,2)) # ユニグラムとバイグラム
+>>> vec.fit(corpus)
+CountVectorizer(analyzer=u'word', binary=False, charset=None,
+        charset_error=None, decode_error=u'strict',
+        dtype=<type 'numpy.int64'>, encoding=u'utf-8', input=u'content',
+        lowercase=True, max_df=1.0, max_features=None, min_df=1,
+        ngram_range=(1, 2), preprocessor=None, stop_words=None,
+        strip_accents=None, token_pattern=u'(?u)\\b\\w\\w+\\b',
+        tokenizer=None, vocabulary=None)
+
+>>> vec.get_feature_names()
+[u'hello', u'hello machine', u'learning', u'learning world', u'machine', u'machine learning', u'world']
+
+# 今度は"word"も特徴量としてカウントされている.
+>>> vec.transform(["World of machine learning"]).toarray()
+array([[0, 0, 1, 0, 1, 1, 1]])
+</code></pre>
+        </section>
+
+        <section>
+        </section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				history: true,
+				center: true,
+        rollingLinks: false,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'none', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+      Reveal.addEventListener( 'slidechanged', function( event ) {
+        MathJax.Hub.Rerender(event.currentSlide);
+      });
+
+		</script>
+
+	</body>
+</html>
