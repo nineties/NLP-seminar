@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="ja">
+
+	<head>
+		<meta charset="utf-8">
+
+    <title>機械学習に基づく自然言語処理勉強会 第2回 @ ナビプラス </title>
+
+		<meta name="description" content="Seminar of category theory">
+    <meta name="author" content="Koichi Nakamura">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/beige.css" id="theme">
+
+    <meta http-equiv="X-UA-Compatible" CONTENT="IE=EmulateIE7" />
+
+		<!-- For syntax highlighting -->
+    <link rel="stylesheet" href="plugin/highlight/styles/github.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+    <script type="text/javascript"
+      src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML">
+    </script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+          displayMath: [ ['$$','$$'], ["\\[","\\]"] ]
+        }
+      });
+    </script>
+
+    <style type="text/css">
+      <!--
+      div.definition {
+        padding-left: 10px;
+        padding-right: 10px;
+        border: 4px solid #333333;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+      }
+
+      .reveal .chapter-title {
+        margin-top: 3em;
+      }
+
+      .reveal {
+        font-size: 36px;
+        line-height: 1.4em;
+      }
+
+      .reveal .slides {
+        text-align: left;
+      }
+
+      .reveal section img {
+        border: none;
+        background: 0;
+        margin-left: 1em;
+        margin-right: 1em;
+        box-shadow: none;
+      }
+
+      .reveal strong {
+        color: #ff6666;
+      }
+
+      .reveal sup {
+        font-size: 40%;
+      }
+
+      .reveal .note {
+        font-size: 40%;
+      }
+
+      .reveal .controls div.navigate-up,
+      .reveal .controls div.navigate-down {
+        display: none;
+      }
+
+      .reveal .block {
+        border: solid 2px;
+        position: relative;
+        border-radius: 8px;
+        margin: 0.5em;
+        padding: 1em 0.8em 0.5em 0.8em;
+      }
+
+      .reveal .block:after {
+        content: "";
+        display: block;
+        clear: both;
+        height: 1px;
+        overflow: hidden;
+      }
+      --> 
+    </style>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+
+        <section>
+        <h2> 機械学習に基づく <br> 自然言語処理勉強会 <br> 第2回 </h2>
+        <h3>@ナビプラス </h3>
+        <small> 中村晃一 <br> 2014年11月27日 </small>
+        </section>
+
+        <section>
+        <h3>謝辞</h3>
+        <p>
+        この会の企画・会場設備の提供をして頂きました<br>
+        &#12849; ナビプラス様<br>
+        にこの場をお借りして御礼申し上げます.
+        </p>
+        </section>
+
+        <section>
+        <h2 class="chapter-title"> 文書の分類問題 </h2>
+        </section>
+
+        <section>
+        <h3> 分類問題とは？ </h3>
+        <p>
+        機械学習における <strong> 分類問題 (classification problem) </strong> とは，特徴ベクトルの空間内の各点 $\mathbf{x}$ に対して
+        (何らかの観点で)適切なラベル $\mathbb{K}=\{1,2,\ldots,K\}$ を割り当てるタスクを指します.
+        </p>
+        <p>
+        自然言語処理においてはメールの分類，ニュース記事の分類，販売商品の分類など様々な応用が考えられます.
+        </p>
+        <div align="center"> <img src="images/classification-problem.png"> </div>
+        </section>
+
+        <section>
+        <p>
+        今回は <strong> 教師付き学習 (supervised learning) </strong> という学習法に基づく手法を紹介します.
+        </p>
+        <p class="fragment">
+        分類問題における教師付き学習とは，学習データ $\mathbf{X}=\{(\mathbf{x}_1,t_1),\ldots,(\mathbf{x}_N,t_N)\}$ から分類器を学習するものです. ここで $\mathbf{x}_i$ は学習用サンプルで， $t_i$ はその正解ラベルです.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        全特徴ベクトルの空間を $\Omega$ と書くことにします. 例えば，頻度ベクトル表現なら $\Omega=\mathbb{N}^W\quad(W:\text{単語数})$，Tf-Idf表現なら $\Omega=\mathbb{R}^W\quad(W:\text{単語数})$ などです. 
+        </p>
+        <p>
+        多くの場合 $\Omega$ には何らかの距離(通常はユークリッド距離)か，何らかの類似度を入れて考えます.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        分類問題とは(何らかの観点で最適な)写像
+        \[ f: \mathbb{R}^W \rightarrow \mathbb{K} \]
+        を構築せよ、という問題です.
+        </p>
+        <p class="fragment">
+        この関数を <strong> 識別関数 (classification function) </strong> などと呼びます. 識別関数で分けられた $\mathbb{R}^W$ の$K$個の互いに素な部分集合 $\mathbf{C}_k = f^{-1}(k)$ それぞれを <strong> クラス (class) </strong> と呼びます.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        識別関数が与えられると，$\Omega$ が $K$ 個の部分集合に区切られる事になります. この各クラスの境界を <strong> 識別面 (classification plane) </strong> と呼びます. 分類問題は，(何らかの観点で最適な)識別面を構築する問題として解釈する事も出来ます.
+        </p>
+        <div align="center"> <img src="images/classification-problem2.png"> </div>
+        </section>
+
+        <section>
+        <p>
+        識別関数(≒識別面)を直に考えるアプローチの他に，特徴ベクトル $\mathbf{x}$ がクラス $k$ に所属する確率
+        \[ p(k|\mathbf{x}) \]
+        を一旦考えるというアプローチも応用が広く重要です.
+        </p>
+        <div align="center"> <img src="images/classification-problem3.png"> </div>
+        </section>
+
+        <section>
+        <p>
+        <strong> ベイズの定理 (Bayes's theorem) </strong> より
+        \[ p(k|\mathbf{x}) = \frac{p(\mathbf{x}|k)p(k)}{p(\mathbf{x})} \propto p(\mathbf{x}|k)p(k) \]
+        なので「クラス $k$ におけるデータの分布 $p(\mathbf{x}|k)$」をモデル化すれば， $p(k|\mathbf{x})$
+        も計算する事が出来ます. これを <strong> 確率的生成モデル (probabilistic generative model) </strong> と呼びます.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        一方，
+        \[ p(k|\mathbf{x}) = \text{何らかの数式} \]
+        という形で，所属確率 $p(k|\mathbf{x})$ を直接モデル化する方法もあります.
+        </p>
+        <p>
+        これは <strong> 確率的識別モデル (probabilisitc classification model)</strong> と呼ばれます.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        所属確率 $p(k|\mathbf{x})$ から識別関数をどうやって作れば良いのかは自明な問題ではないですが，
+        単純に分類の正解率を最大化したいならば「所属確率が最大のクラスに割り当てる」とすれば良いです.
+        つまり
+        \[ f(\mathbf{x}) =\mathop{\rm arg~max}\limits_{k}p(k|\mathbf{x}) \]
+        とします. これを <strong> 事後確率最大化(maximum a posteriori, MAP) </strong> 推定と言います.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        分類の良し悪しを単純な正解率と考えられない状況では工夫が必要です.
+        通常は分類結果に基いて何らかのアクション(メールを特定フォルダに入れるなど)が行われますので，
+        その効果まで総合的に考える必要が生じます.
+        </p>
+        <p>
+        詳しくは省略しますが， <strong> 統計的決定理論 (statistical decision theory) </strong> について調べて下さい.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        以下，代表的な識別器を幾つか紹介していきます.
+        </p>
+        <p>
+        まず，確率論的なモデルの例として
+        </p>
+        <ul>
+            <li> 生成モデル:単純ベイズモデル </li>
+            <li> 識別モデル:対数線形モデル </li>
+        </ul>
+        <p>
+        非確率論的なモデルの例として
+        </p>
+        <ul>
+            <li> サポートベクターマシン </li>
+            <li> k近傍法 </li>
+        </ul>
+        <p>
+        を紹介します.
+        </p>
+        </section>
+
+        <section>
+        <h2 class="chapter-title"> 単純ベイズ分類 </h2>
+        </section>
+
+        <section>
+        <h3> 単純ベイズ分類 </h3>
+        <p>
+        <strong> 単純ベイズ分類器(naive bayes classifier)</strong> とは確率的生成モデルとして <strong> 単純ベイズモデル (naive bayes model) </strong> を利用した分類器の事です.
+        </p>
+        <p class="fragment">
+        単純ベイズモデルとは，<strong> 各クラスにおいて，特徴量が全て独立である </strong> と仮定したモデルです.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        例えば，ある文書に「政治」という単語が出現したならば，それを知る前と比べて「国際」という単語の出現確率は(ベイズ的な意味では)増加すると思います.
+        このように、文書における単語の出現は一般には独立ではないと考えられます.
+        </p>
+        <p class="fragment">
+        これを「各単語は全く無関係に発生する」と仮定してしまうのが単純ベイズモデルです.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        文書 $d$ の二値ベクトル表現を $\mathbf{d}=(w_1,w_2,\ldots,w_D)$ とします.
+        </p>
+        <p>
+        計算したいものは，クラス $k$ において $\mathbf{d}$ が生成する確率
+        \[ p(w_1,w_2,\ldots,w_D|k) \]
+        ですが，$w_1,w_2,\ldots,w_D$ は全て独立であると考えるので
+        \[ p(w_1,w_2,\ldots,w_D|k) = p(w_1|k)p(w_2|k)\cdots p(w_D|k) = \prod_{i=1}^Dp(w_i|k) \]
+        となります.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        ここでは，二値ベクトル表現を用いましたが， この場合 $w_i=0,1$ のいずれかなので $p(w_i|k)$ はベルヌーイ分布となります. 
+        従って，以上のモデルは <strong> 単純ベイズベルヌーイモデル (naive bayes bernoulli model) </strong> と呼ばれます.
+        </p>
+        <p class="fragment">
+        二値ベクトルの代わりに頻度(回数)ベクトル表現を用いた場合には， <strong> 多項モデル (multinomial model) </strong> と呼ばれます.
+        多項モデルでは文書の長さも確率変数となります. 各単語の出現回数は文書長に影響を受ける為です.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        その他のBOWモデルについても単純ベイズの仮定を導入する事が可能です. その場合に
+        \[ p(w_i|k) \]
+        は正規分布やベータ分布など特徴量の性質に応じてモデル化する事になります.
+        </p>
+        <p class="fragment">
+        単純ベイズとはあくまで変数の独立性関係に関するモデルであって，各変数毎の具体的な分布と組み合わせて使用する事になります.
+        </p>
+        </section>
+
+        <section>
+        <p> 20newsgroupsデータセットで実験してみます. このデータセットでは各文書毎のトピックが教師データとして与えられているのでそれを学習させてみます. </p>
+        <p>
+        前処理としてポーターのステマーを施します.  約1万文書のうち9割の文書を学習し，残りの1割の文書に対する正解率を調べます.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        ベルヌーイモデル、多項モデルそれぞれを実験結果は以下です. コードは <a href="prog/prog2-1.py">prog2-1.py </a> です.
+        </p>
+        <div align="center">
+            <table>
+                <tr> <th> モデル </th> <th> 正解率 </th> <th> 訓練時間 </th> <th> 予測時間 </th> </tr>
+                <tr> <td> 単純ベイズ(ベルヌーイ) </td> <td> 78.4% </td> <td> 0.185秒 </td> <td> 0.081秒 </td> </tr>
+                <tr> <td> 単純ベイズ(多項) </td> <td> 89.3% </td> <td> 0.180秒 </td> <td> 0.017秒 </td> </tr>
+            </table>
+        </div>
+        </section>
+
+        <section>
+        <h2 class="chapter-title"> 対数線形モデル </h2>
+        </section>
+
+        <section>
+        <h3> 対数線形モデル </h3>
+        <p>
+        <strong> 対数線形モデル (loglinear model) </strong> は代表的な確率的識別モデルの１つで，文書 $\mathbf{d}$ がクラス $k$ に所属する確率を
+        \[ p(k|\mathbf{d}) \propto \exp(\mathbf{w}_k^T \mathbf{d}) \]
+        とモデル化します.
+        </p>
+        <p class="fragment">
+        <strong> ロジスティックモデル (logistic model) </strong> や <strong> 最大エントロピーモデル (maximum entropy model) </strong> と呼ばれるものと同じです(「対数線形」はこれらよりもっと広い範囲のモデルを指します).
+        </p>
+        </section>
+
+        <section>
+        <p>
+        より一般には，素性関数 $\phi$ というものを導入した
+        \[ p(k|\mathbf{d}) \propto \exp(\mathbf{w}^T\phi(\mathbf{d},k)) \]
+        とします.
+        </p>
+        <p>
+        素性関数とは文書と正解ラベルから特徴ベクトルへ変換する関数で，これを導入する事によって様々な問題を同一のモデルで表現したり，モデルの複雑性を抑えたりといった事が出来ます.
+        </p>
+        <p>
+        以降は，前頁の立式を元に進めます.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        確率的生成モデルの場合は各 $p(w_i|k)$ を学習してから，間接的に $p(k|\mathbf{d})$ を構築しました.
+        こちらの場合は同時確率 $p(\mathbf{d},k)$ が計算出来るので，識別問題以外にも様々な応用の可能性があります.
+        </p>
+        <p>
+        一方，対数線形モデルでは直接 $p(k|\mathbf{d})$ を学習させるので一般に識別性能は向上します.
+        その反面，確率モデルとしての応用可能性は若干下がります.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        対数線形モデルでは，学習データ $\{(\mathbf{d}_1,t_1),(\mathbf{d}_2,t_2),\ldots,(\mathbf{d}_N,t_N)\}$ に対して，事後確率の対数尤度
+        \[ \sum_{i=1}^N \log p(t_i|\mathbf{d}_i) \]
+        が最大となるようにパラメータ $\mathbf{w}_k$の学習を行います.
+        </p>
+        <p>
+        これは解析的に解くことが出来ない為，数値的解法が利用されます.
+        (詳しくは <a href="http://nineties.github.io/prml-seminar/5.html"> パターン認識機械学習勉強会第5回 </a>)
+        </p>
+        </section>
+
+        <section>
+        <p>
+        自然言語処理の場合には，特徴ベクトル空間がスカスカ(データスパースネス問題)なので過学習が起きやすくなってしまいますから，極端な $\mathbf{w}_k$ が学習されないように正則化項を追加したものを最大化するという事も多いです. 例えば
+        \[ \sum_{i=1}^N \log p(t_i|\mathbf{d}_i) - \alpha \sum_{k=1}^K ||\mathbf{w}_k||^2 \]
+        などです.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        以下が，先ほどと同じデータセットに対する実験結果です. やはり精度が向上しています.
+        コードは <a href="prog/prog2-1.py">prog2-2.py </a> です.
+        </p>
+        <div align="center">
+            <table>
+                <tr> <th> モデル </th> <th> 正解率 </th> <th> 訓練時間 </th> <th> 予測時間 </th> </tr>
+                <tr> <td> 単純ベイズ(ベルヌーイ) </td> <td> 78.4% </td> <td> 0.185秒 </td> <td> 0.081秒 </td> </tr>
+                <tr> <td> 単純ベイズ(多項) </td> <td> 89.3% </td> <td> 0.180秒 </td> <td> 0.017秒 </td> </tr>
+                <tr> <td> 対数線形 </td> <td> 90.0% </td> <td> 32.155秒 </td> <td> 0.016秒 </td> </tr>
+            </table>
+        </div>
+        </section>
+
+        <section>
+        <h2 class="chapter-title"> サポートベクターマシン </h2>
+        </section>
+
+        <section>
+        <p>
+        <strong> サポートベクトルマシン (support vector machine, SVM) </strong> とは確率的モデルに基づかない分類器で，最大マージン分類という考え方を用いています. 非常に高い識別性能を持ちます.
+        </p>
+        </section>
+
+        <section>
+        <h3> 最大マージン分類器 </h3>
+        <p>
+        2クラス場合を考えます. 今, 学習データ $\{(\mathbf{d}_1,t_1),(\mathbf{d}_2,t_2),\ldots,(\mathbf{d}_n,t_n)\}\quad(t_i=\pm 1)$ に対して，適当な変換 $\Psi$ を施した結果，平面で分離できるようになっているとします.
+        </p>
+        <div align="center"> <img width="400px" src="images/maximum-margin-classifier1.png"> </div>
+        </section>
+
+        <section>
+        <p>
+        この時, 2つのクラスを分離する識別面は唯一に定まりません.
+        </p>
+        <p style="color:transparent">
+        そこで, 最も近い $\Psi(\mathbf{x}_i)$ までの距離(マージン)が最大となるような識別面を選ぶ事にします. これを 最大マージン分類器(maximum margin classifier)と呼びます.
+        </p>
+        <div align="center"> <img width="400px" src="images/maximum-margin-classifier3.png"> </div>
+        </section>
+
+        <section style="font-size:90%">
+        <p>
+        この時, 2つのクラスを分離する識別面は唯一に定まりません.
+        </p>
+        <p>
+        そこで, 最も近い $\Psi(\mathbf{x}_i)$ までの距離(<strong>マージン</strong>)が最大となるような識別面を選ぶ事にします. これを<strong>最大マージン分類器(maximum margin classifier)</strong>と呼びます.
+        </p>
+        <p>
+        このアイデアによって，未知のデータに対する高い性能(汎化性能)を実現しています.
+        </p>
+        <div align="center"> <img width="400px" src="images/maximum-margin-classifier4.png"> </div>
+        </section>
+
+        <section>
+        <p>
+        訓練文書数を $N$，特徴ベクトルの次元を $D$ とすると， SVMを訓練する為には $\mathcal{O}(N^2)$ 程度の計算時間が必要となります.
+        </p>
+        <p class="fragment">
+        計算時間が $D$ に依存しないという事に注目しましょう. SVMでは非常に高い次元の特徴ベクトルや無限次元の特徴ベクトルを使う事が出来ます.
+        </p>
+        <p class="fragment">
+        一方で，訓練文書数が増えると劇的に計算時間が増加してしまい，数万文書ほどが限界です. 精度が下がりますが <strong> 確率的勾配降下法 (stochastic gradient method) </strong> などの近似解法を利用する事で大規模なデータセットにも利用出来ます.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        詳しくは <a href="http://nineties.github.io/prml-seminar/12.html">パターン認識・機械学習勉強会第12回 </a> をご覧下さい.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        先ほどのデータセットに対する実験結果です. SVM(SGD) は確率的勾配降下法を使った場合です.
+        コードは <a href="prog/prog2-1.py">prog2-3.py </a> です.
+        </p>
+        <div align="center">
+            <table>
+                <tr> <th> モデル </th> <th> 正解率 </th> <th> 訓練時間 </th> <th> 予測時間 </th> </tr>
+                <tr> <td> 単純ベイズ(ベルヌーイ) </td> <td> 78.4% </td> <td> 0.185秒 </td> <td> 0.081秒 </td> </tr>
+                <tr> <td> 単純ベイズ(多項) </td> <td> 89.3% </td> <td> 0.180秒 </td> <td> 0.017秒 </td> </tr>
+                <tr> <td> 対数線形 </td> <td> 90.0% </td> <td> 32.155秒 </td> <td> 0.016秒 </td> </tr>
+                <tr> <td> SVM </td> <td> 88.9% </td> <td> 6.501秒 </td> <td> 0.012秒 </td> </tr>
+                <tr> <td> SVM(SGD) </td> <td> 85.6% </td> <td> 0.380秒 </td> <td> 0.011秒 </td> </tr>
+            </table>
+        </div>
+        </section>
+
+        <section>
+        <h2 class="chapter-title"> k近傍法 </h2>
+        </section>
+
+        <section>
+        <h2> $k$近傍法 </h2>
+        <p>
+        入力 $\mathbf{x}$ に対して学習データを近い順番に $k$ 個選び, 多数決によって $\mathbf{x}$ が属すクラスを決定する手法を
+        <strong> $k$近傍法 ($k$-nearest-neighbours classification rule, $k$-NN法) </strong> と呼びます.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        例えば以下の $\mathbf{x}$ は $5$-NN法 ではクラス $0$ に分類されます.
+        </p>
+        <div align="center"> <img width="70%" src="images/knn1.png"> </div>
+        </section>
+
+        <section>
+        <p>
+        $k$-NN法がこれまでに紹介したものと全く異なるのは，単純ベイズにおける $p(w_i|k)$ や対数線形モデルにおける $\mathbf{w}_k$ などのパラメータが存在しないという事です.
+        </p>
+        <p class="fragment">
+        こういったモデルは <strong> ノンパラメトリックモデル (non-parametric model) </strong> と呼ばれます.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        $k$-NN法は単純な方法で複雑な識別面を表現する事ができ学習データが十分にある場合には非常に良い識別精度を発揮します.
+        </p>
+        <p class="fragment" data-fragment-index="1">
+        一方 $k$ が小さすぎると以下の例 ($k=1$)のように学習データのノイズを拾ってしまいます.
+        </p>
+        <div class="fragment" data-fragment-index="1" align="center"> <img width="60%" src="images/knn2.png"> </div>
+        </section>
+
+        <section>
+        <p>
+        また，$k$近傍法では学習データ集合 $D$ 全体を保存しておかなければいけないという問題もあります.
+        </p>
+        <p>
+        また $D$ のサイズが，予測の計算量にも影響するという事にも注意しなければいけません.
+        </p>
+        </section>
+
+        <section style="font-size:90%">
+        <p>
+        実験結果です. 但し，単純な頻度ベクトルでは精度が出ないので $k$ 近傍法のみTf-Idfを使っています.
+        また $k=5$ とし，ユークリッド距離を利用しています. コードは <a href="prog/prog2-1.py">prog2-3.py </a> です.
+        </p>
+        <p>
+        訓練時間がほぼ無い代わりに，予測時間が長くなるという特徴が判ると思います.
+        </p>
+        <div align="center">
+            <table>
+                <tr> <th> モデル </th> <th> 正解率 </th> <th> 訓練時間 </th> <th> 予測時間 </th> </tr>
+                <tr> <td> 単純ベイズ(ベルヌーイ) </td> <td> 78.4% </td> <td> 0.185秒 </td> <td> 0.081秒 </td> </tr>
+                <tr> <td> 単純ベイズ(多項) </td> <td> 89.3% </td> <td> 0.180秒 </td> <td> 0.017秒 </td> </tr>
+                <tr> <td> 対数線形 </td> <td> 90.0% </td> <td> 32.155秒 </td> <td> 0.016秒 </td> </tr>
+                <tr> <td> SVM </td> <td> 88.9% </td> <td> 6.501秒 </td> <td> 0.012秒 </td> </tr>
+                <tr> <td> SVM(SGD) </td> <td> 85.6% </td> <td> 0.380秒 </td> <td> 0.011秒 </td> </tr>
+                <tr> <td> K-NN </td> <td> 80.7% </td> <td> 0.030秒 </td> <td> 1.481秒 </td> </tr>
+            </table>
+        </div>
+        </section>
+
+        <section>
+        <h3> 第2回はここで終わります </h3>
+        <p>
+        次回は「文書のクラスタリング問題」を紹介します.
+        </p>
+        </section>
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				history: true,
+				center: true,
+        rollingLinks: false,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'none', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+      Reveal.addEventListener( 'slidechanged', function( event ) {
+        MathJax.Hub.Rerender(event.currentSlide);
+      });
+
+		</script>
+
+	</body>
+</html>
