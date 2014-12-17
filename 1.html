@@ -764,7 +764,211 @@ array([[0, 0, 1, 0, 1, 1, 1]])
         </section>
 
         <section>
+        <p>
+        BOW表現や，Bag of $n$-grams表現は一般に特徴ベクトルが非常に高次元になるという事に注意が必要です.
+        </p>
+        <p class="fragment">
+        語彙数が $W$ ならば，BOWベクトルの次元は $W$ になります. $W$ は数万～数十万というオーダーになります.
+        </p>
+        <p class="fragment">
+        バイグラムの場合，全ての単語の連接を考慮するならば $W^2$ 次元となります. これはとても許容できないので，通常はコーパスに出現したバイグラムやあらかじめ辞書に用意したバイグラムだけを考えます. それにしてもBOWの数倍の次元になります.
+        </p>
         </section>
+
+        <section>
+        <p> 20newsgroupsコーパスの場合の例 </p>
+<pre><code class="python" style="max-height:400px">>>> from sklearn.datasets import fetch_20newsgroups
+>>> corpus = fetch_20newsgroups().data
+>>> len(corpus) # 文書数は約1万
+11314
+>>> from sklearn.feature_extraction.text import CountVectorizer
+>>> vec = CountVectorizer()
+>>> vec.fit(corpus)
+CountVectorizer(analyzer=u'word', binary=False, charset=None,
+        charset_error=None, decode_error=u'strict',
+        dtype=<type 'numpy.int64'>, encoding=u'utf-8', input=u'content',
+        lowercase=True, max_df=1.0, max_features=None, min_df=1,
+        ngram_range=(1, 1), preprocessor=None, stop_words=None,
+        strip_accents=None, token_pattern=u'(?u)\\b\\w\\w+\\b',
+        tokenizer=None, vocabulary=None)
+>>> len(vec.get_feature_names()) # 特徴ベクトルの次元は約13万
+130107
+>>> vec = CountVectorizer(ngram_range=(1,2)) # バイグラムも追加した場合
+>>> vec.fit(corpus)
+CountVectorizer(analyzer=u'word', binary=False, charset=None,
+        charset_error=None, decode_error=u'strict',
+        dtype=<type 'numpy.int64'>, encoding=u'utf-8', input=u'content',
+        lowercase=True, max_df=1.0, max_features=None, min_df=1,
+        ngram_range=(1, 2), preprocessor=None, stop_words=None,
+        strip_accents=None, token_pattern=u'(?u)\\b\\w\\w+\\b',
+        tokenizer=None, vocabulary=None)
+>>> len(vec.get_feature_names()) # 特徴ベクトルの次元は約118万
+1181803
+</code></pre>
+        </section>
+
+        <section>
+        <p>
+        数十万～数百万次元のベクトルをそのままメモリに確保するのは困難です. 文書１つで数KB～数MBほど使ってしまいます.
+        </p>
+        <p class="fragment">
+        しかし，頻度ベクトル表現では特徴ベクトルの殆どの成分は $0$ になりますので， $0$ でない成分のみを記録すれば良いです.
+        これを <strong> 疎ベクトル (sparse vector) </strong> 表現と呼びCSR形式，CSC形式など幾つかの形式があります.
+        使用する計算の種類毎に適切な形式が異なりますので,大きな特徴次元のベクトルを使う場合にはある程度の勉強が必要です.
+        </p>
+        <p class="fragment">
+        一方，通常使われるの配列としてのベクトル表現を <strong> 密ベクトル (dense vector) </strong> 表現と呼びます.
+        </p>
+        </section>
+
+        <section>
+<pre><code class="python" style="max-height:400px">>>> from sklearn.datasets import fetch_20newsgroups
+>>> corpus = fetch_20newsgroups().data
+>>> from sklearn.feature_extraction.text import CountVectorizer
+>>> vec = CountVectorizer()
+>>> vec.fit(corpus)
+CountVectorizer(analyzer=u'word', binary=False, charset=None,
+        charset_error=None, decode_error=u'strict',
+        dtype=<type 'numpy.int64'>, encoding=u'utf-8', input=u'content',
+        lowercase=True, max_df=1.0, max_features=None, min_df=1,
+        ngram_range=(1, 1), preprocessor=None, stop_words=None,
+        strip_accents=None, token_pattern=u'(?u)\\b\\w\\w+\\b',
+        tokenizer=None, vocabulary=None)
+>>> vec.transform(["Hello World"])  # Compressed Sparse Row (CSR)形式が使われている
+<1x130107 sparse matrix of type '<type 'numpy.int64'>'
+        with 2 stored elements in Compressed Sparse Row format>
+>>> print vec.transform(["Hello World"])    # 62681成分が1, 125053成分が1という形式でメモリ内に格納
+  (0, 62681)    1
+  (0, 125053)   1
+</code></pre>
+        </section>
+
+        <section>
+        <h3> ハッシュ法 </h3>
+        <p>
+        各単語 $w$ を適当な <strong> ハッシュ関数 (hash function) </strong> $h$ で変換し，あらかじめ定めたベクトル長 $D$ での剰余を取った
+        \[ h(w) \bmod D \]
+        を単語 $w$ のインデックスとする方法を <strong> ハッシュ法 (hashing) </strong> とか <strong> ハッシュトリック (hash trick) </strong> と言います.
+        当然 $h(w) = h(w') \pmod D$ ならば単語 $w$ と $w'$ は特徴ベクトルの同じ位置に対応する事になります.
+        </p>
+        <p class="fragment">
+        $D$ で剰余を取る際に $h(w)$ の符号が捨てられるのはもったいないので，$h(w)$ の符号を特徴量の符号に反映させるという方法も利用されます.
+        </p>
+        </section>
+
+        <section>
+        <p>
+        以下の例で詳しく見てみましょう.
+        </p>
+<pre><code class="python" style="max-height:400px">>>> from sklearn.feature_extraction.text import HashingVectorizer
+>>> vec = HashingVectorizer(n_features=3)  # 特徴次元=3 (例の為にワザと小さな値を使用)
+>>> vec.transform(["Hello World"]).toarray()
+array([[-0.70710678,  0.70710678,  0.        ]]) # ベクトル (-1, 1, 0) を正規化したもの
+
+# 何故このようなベクトルになるのか?
+# まず，利用されているハッシュ関数は以下
+>>> from sklearn.utils.murmurhash import murmurhash3_bytes_s32 as hasher
+
+# 以下の結果から"hello"は第1成分，"world"は第0成分となる.
+>>> hasher("hello", 0) % 3
+1
+>>> hasher("world", 0) % 3
+0
+
+# 以下の結果から "hello" の符号は正，"world"の符号は負となる.
+>>> hasher("hello", 0)
+613153351
+>>> hasher("world", 0)
+-74040069
+
+# 従って，頻度ベクトルは (-1, 1, 0) となる.
+
+# hasherの値の正負と剰余が一致する場合にはそれらの単語を区別する事は出来ない.
+</code></pre>
+        </section>
+
+        <section>
+        <p>
+        ハッシュ法ではあらかじめコーパスを学習させる必要がありませんし，辞書を持ちまわる必要もありません.
+        従って未知の単語でも対応出来ますし，省メモリであるという利点があります.
+        </p>
+        <p>
+        単語の衝突が起きる可能性があるので，特徴次元はかなり大きく取らなければいけません.
+        </p>
+        </section>
+
+        <section>
+        <h3> 単語のベクトル表現 </h3>
+        <p>
+        ここまでは文書 $d$ を特徴ベクトル化する方法を紹介してきましたが，次は単語 $w$ を特徴ベクトル化する方法を紹介します.
+        </p>
+        <p>
+        未知の語の意味の判定や，単語と単語の類似度の計算などのタスクに必要になります. 前者は例えば翻訳エンジンなど，後者は検索エンジンなどで必要となる技術です.
+        </p>
+        </section>
+
+        <section>
+        <h3> 文脈窓表現 </h3>
+        <p>
+        ある単語 $w$ を特徴づける考え方として，<strong> $w$ はどのような文脈の中で利用されるか? </strong> という考え方があります.
+        意味の似た単語は似た文脈で利用されやすいはずです.
+        </p>
+        <p>
+        この考え方に基づく手法の１つが(局所) <strong> 文脈窓表現 (context window representation) </strong> です.
+        </p>
+        <div align="center"> <img width="700px" src="images/context-window.png"> </div>
+        </section>
+
+        <section>
+        <p>
+        文脈窓表現では，単語 $w$ の前 $a$ 単語，後ろ $b$ 単語にどのような単語が出現しやすいか？をコーパスから学習し，それを特徴量として利用します.
+        </p>
+        <p>
+        単に文脈窓表現と言っても，前後の単語の出現位置を区別するものしないもの，$w$ からの距離に応じて重み付けをするものなどのバリエーションが存在します.
+        </p>
+        </section>
+
+        <section>
+        <h3> word2vec </h3>
+        <p>
+        最近話題の <strong> word2vec </strong> という表現を紹介します. この表現では， 類似している単語がベクトル空間中の近くに配置されるような表現です.
+        </p>
+        <p>
+        文脈窓表現と同様の Skip-gram 及び CBOW (continuous bag of words) という表現を用いて類似度を計算します. ベクトル空間への配置を行う関数は機械学習を行って構築します.
+        </p>
+        </section>
+
+        <section style="font-size:90%">
+        <p>
+        20newsgroupsを学習させて，二次元のword2vecモデルを構築すると以下のようになります. 小さいコーパスですし，低次元なのであまり精度は良くないと思いますが，類似する単語が近くに配置されているのを見る事が出来ると思います.
+        </p>
+        <div align="center"> <img width="900px" src="prog/prog1-1.png"> </div>
+        </section>
+
+        <section>
+        <p> 以下は100次元の場合の例です. </p>
+<pre><code class="python" style="max-height:400px">>>> import re
+>>> from sklearn.datasets import fetch_20newsgroups
+>>> from gensim.models import Word2Vec
+>>> corpus = map(lambda s: re.sub('[0-9!"#$%&\'()*+,\-./:;<=>?@\\\[\]^_`{|}~]',' ',s.lower()).split(), fetch_20newsgroups().data)
+>>> model = Word2Vec(corpus, size=100, window=5)
+
+# 最も似ている単語はなにか？
+>>> model.most_similar("windows")
+[(u'dos', 0.8403698205947876), (u'apps', 0.7949127554893494), (u'os', 0.7712303996086121), (u'norton', 0.7302378416061401), (u'desktop', 0.726622462272644), (u'linux', 0.7111925482749939), (u'vfintd', 0.7057019472122192), (u'microsoft', 0.7027161717414856), (u'workgroups', 0.6950401067733765), (u'nt', 0.6919289827346802)]
+
+>>> model.most_similar("john")
+[(u'stephen', 0.6191455125808716), (u'eaton', 0.6077519655227661), (u'joseph', 0.6063635349273682), (u'neuharth', 0.5904262661933899), (u'esh', 0.5818496942520142), (u'tucker', 0.5785086750984192), (u'phillip', 0.5730155110359192), (u'butera', 0.5722994804382324), (u'peter', 0.5692060589790344), (u'curcio', 0.5678284168243408)]
+</code></pre>
+        </section>
+
+        <section>
+        <h3> 第1回はここで終わります </h3>
+        <p>
+        次回は「文書の分類問題」を題材とします.
+        </p>
+        </section>
+
 			</div>
 		</div>
 
