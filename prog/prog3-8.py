@@ -6,9 +6,9 @@ from sklearn.mixture import GMM
 
 df = fetch_20newsgroups()
 
-# Tfidf表現に変換し，K-meansでクラスタリング
+# Tfidf表現に変換し，混合分布モデルでクラスタリング
 K = 10
-vec = TfidfVectorizer(max_df=0.01, min_df=10)
+vec = TfidfVectorizer(max_df=0.05, min_df=50)
 data = vec.fit_transform(df.data).toarray()
 print len(vec.get_feature_names())
 cls = GMM(n_components=K, covariance_type='spherical')
